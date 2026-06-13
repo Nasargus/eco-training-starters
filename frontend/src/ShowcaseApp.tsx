@@ -85,17 +85,6 @@ function HomePage({ site, articles }: { site: SitePayload; articles: Article[] }
   const lead = articles[0];
   const secondary = articles.slice(1, 4);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      fetch('/api/analytics/beacon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: 'hero-video', screen: 'home', sentAt: Date.now() })
-      }).catch(() => undefined);
-    }, 4000);
-
-    return () => window.clearInterval(timer);
-  }, []);
 
   return (
     <div className="showcase-stack">
@@ -121,7 +110,7 @@ function HomePage({ site, articles }: { site: SitePayload; articles: Article[] }
       {lead ? (
         <section className="showcase-editorial-grid">
           <article className="showcase-lead-story">
-            <img src={lead.heroAsset} alt={lead.title} />
+           <img src={lead.heroAsset} alt={lead.title} loading="lazy" width="800" height="450" />
             <div className="showcase-lead-copy">
               <p className="showcase-eyebrow">Edition du moment</p>
               <h2>{lead.title}</h2>
@@ -230,8 +219,11 @@ function AboutPage({ site }: { site: SitePayload }) {
   );
 }
 
+const PAGE_SIZE = 5;
+
 function NewsPage({ articles }: { articles: Article[] }) {
   const [selectedSlug, setSelectedSlug] = useState(articles[0]?.slug ?? '');
+  const [visible, setVisible] = useState(PAGE_SIZE);
   const [detail, setDetail] = useState<ArticleDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -253,7 +245,7 @@ function NewsPage({ articles }: { articles: Article[] }) {
           <p className="showcase-eyebrow">Redaction</p>
           <h1>Fil d'actualite</h1>
         </div>
-        {articles.map((article) => (
+        {articles.slice(0, visible).map((article) => (
           <button
             key={article.slug}
             type="button"
@@ -265,6 +257,11 @@ function NewsPage({ articles }: { articles: Article[] }) {
             <small>{formatDate(article.publishedAt)}</small>
           </button>
         ))}
+        {visible < articles.length && (
+          <button type="button" onClick={() => setVisible(v => v + PAGE_SIZE)} style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}>
+            Charger plus d'articles
+          </button>
+        )}
       </aside>
 
       <article className="showcase-article-viewer">
@@ -272,7 +269,7 @@ function NewsPage({ articles }: { articles: Article[] }) {
           <p>Chargement de l'article...</p>
         ) : (
           <>
-            <img src={detail.heroAsset} alt={detail.title} className="showcase-article-hero" />
+           <img src={detail.heroAsset} alt={detail.title} className="showcase-article-hero" loading="lazy" width="800" height="450" />
             <div className="showcase-article-header">
               <p className="showcase-eyebrow">{detail.category}</p>
               <h2>{detail.title}</h2>
@@ -297,7 +294,7 @@ function NewsPage({ articles }: { articles: Article[] }) {
             </div>
             <section className="showcase-media-gallery">
               {detail.mediaGallery.map((asset) => (
-                <img key={asset} src={asset} alt={detail.title} />
+               <img key={asset} src={asset} alt={detail.title} loading="lazy" width="400" height="300" />
               ))}
             </section>
           </>
@@ -328,7 +325,7 @@ function ContactPage({ site }: { site: SitePayload }) {
           </div>
         </article>
         <aside className="showcase-aside-media">
-          <img src="/assets/showcase-hero-3.svg" alt="Affiche contact" />
+          <div style={{ background: "linear-gradient(135deg, #1a3a5c 0%, #2e75b6 100%)", borderRadius: "8px", minHeight: "220px" }} aria-hidden="true" />
         </aside>
       </section>
 

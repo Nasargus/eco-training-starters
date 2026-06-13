@@ -35,7 +35,16 @@ app.get('/api/site', (_req, res) => {
 });
 
 app.get('/api/articles', (_req, res) => {
-  res.json(readJson('data/articles.json'));
+  const articles = readJson('data/articles.json');
+  const slim = articles
+    .sort((a: { publishedAt: string }, b: { publishedAt: string }) =>
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    )
+    .map(({ id, slug, title, category, author, publishedAt, excerpt, heroAsset }: {
+      id: number; slug: string; title: string; category: string;
+      author: string; publishedAt: string; excerpt: string; heroAsset: string;
+    }) => ({ id, slug, title, category, author, publishedAt, excerpt, heroAsset }));
+  res.json(slim);
 });
 
 app.get('/api/articles/:slug', (req, res) => {
